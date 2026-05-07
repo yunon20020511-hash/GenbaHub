@@ -12,7 +12,8 @@
       "Bash(taskkill /F /IM node.exe)",
       "Bash(Start-Sleep -Seconds 2)",
       "PowerShell(Set-Location \"C:\\\\Users\\\\yunon\\\\claude-projects\\\\ricebuger_app\"; $proc = Start-Process -NoNewWindow -FilePath \"cmd\" -ArgumentList \"/c npm run dev > dev.log 2>&1\" -PassThru; Write-Host \"PID: $\\($proc.Id\\)\")",
-      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('title:', d.get\\('title',''\\)\\); print\\('tags:', d.get\\('tags',[]\\)\\); print\\('advice:', d.get\\('advice',''\\)[:50]\\)\")"
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('title:', d.get\\('title',''\\)\\); print\\('tags:', d.get\\('tags',[]\\)\\); print\\('advice:', d.get\\('advice',''\\)[:50]\\)\")",
+      "Bash(Remove-Item *)"
     ]
   }
 }
