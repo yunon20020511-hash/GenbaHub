@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 3px;
+}
+
+/* Markdown rendering */
+.markdown-content { color: #cbd5e1; font-size: 0.875rem; line-height: 1.75; }
+.markdown-content h1, .markdown-content h2 { color: #f1f5f9; font-weight: 600; margin: 1.25rem 0 0.5rem; font-size: 1rem; }
+.markdown-content h3 { color: #e2e8f0; font-weight: 500; margin: 1rem 0 0.25rem; font-size: 0.9rem; }
+.markdown-content p { margin-bottom: 0.75rem; }
+.markdown-content a { color: #06b6d4; text-decoration: underline; }
+.markdown-content strong { color: #f1f5f9; font-weight: 600; }
+.markdown-content em { color: #94a3b8; font-style: italic; }
+.markdown-content code { background: #0f172a; color: #67e8f9; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-size: 0.8rem; font-family: 'Fira Code', monospace; border: 1px solid #334155; }
+.markdown-content pre { background: #0f172a; border: 1px solid #334155; border-radius: 0.5rem; padding: 1rem; overflow-x: auto; margin-bottom: 1rem; }
+.markdown-content pre code { background: none; border: none; padding: 0; color: #67e8f9; display: block; font-size: 0.8rem; line-height: 1.6; }
+.markdown-content ul, .markdown-content ol { padding-left: 1.5rem; margin-bottom: 0.75rem; }
+.markdown-content li { margin-bottom: 0.25rem; }
+.markdown-content ul li { list-style-type: disc; }
+.markdown-content ol li { list-style-type: decimal; }
+.markdown-content blockquote { border-left: 3px solid #06b6d4; padding-left: 1rem; color: #94a3b8; margin-bottom: 0.75rem; font-style: italic; }
+.markdown-content table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; font-size: 0.8rem; }
+.markdown-content th { background: #1e293b; color: #e2e8f0; padding: 0.5rem 0.75rem; border: 1px solid #334155; text-align: left; font-weight: 600; }
+.markdown-content td { padding: 0.5rem 0.75rem; border: 1px solid #334155; color: #cbd5e1; }
+.markdown-content tr:nth-child(even) td { background: #1e293b40; }
+.markdown-content hr { border: none; border-top: 1px solid #334155; margin: 1rem 0; }

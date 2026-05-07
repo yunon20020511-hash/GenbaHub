@@ -1,0 +1,87 @@
+
+> project-k@0.1.0 dev
+> next dev
+
+  ▲ Next.js 14.2.21
+  - Local:        http://localhost:3000
+  - Environments: .env.local, .env
+
+ ✓ Starting...
+ ✓ Ready in 2.9s
+ ✓ Compiled /api/ai/structure in 376ms (133 modules)
+(node:44204) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+ POST /api/ai/structure 200 in 2432ms
+ ○ Compiling /post ...
+ ✓ Compiled /post in 1198ms (601 modules)
+ GET /post 200 in 1499ms
+ ✓ Compiled /api/messages in 156ms (357 modules)
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 382ms
+ POST /api/ai/structure 200 in 2003ms
+ ✓ Compiled /api/posts in 242ms (359 modules)
+ POST /api/posts 200 in 321ms
+ ✓ Compiled / in 426ms (615 modules)
+ GET /api/posts 200 in 25ms
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 34ms
+ GET /api/posts 200 in 19ms
+ ✓ Compiled /skills in 375ms (623 modules)
+ ✓ Compiled /api/skills in 161ms (371 modules)
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 338ms
+ GET /api/skills 200 in 346ms
+ GET /api/skills 200 in 14ms
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 15ms
+ GET /api/posts 200 in 19ms
+ GET /api/posts 200 in 12ms
+ ✓ Compiled in 3.8s (519 modules)
+ ✓ Compiled /api/posts in 75ms (283 modules)
+ GET /api/posts 200 in 186ms
+ GET /api/posts 200 in 13ms
+ GET / 200 in 225ms
+ GET /api/posts 200 in 45ms
+ ✓ Compiled /api/messages in 210ms (285 modules)
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 367ms
+ GET /api/posts 200 in 334ms
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 11ms
+ ○ Compiling /search ...
+ ✓ Compiled /search in 643ms (563 modules)
+ ✓ Compiled /skills in 437ms (568 modules)
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 18ms
+ ✓ Compiled /api/skills in 176ms (298 modules)
+ GET /api/skills 200 in 222ms
+ GET /api/skills 200 in 13ms
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 11ms
+ ✓ Compiled /messages in 337ms (562 modules)
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 20ms
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 11ms
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 13ms
+ GET /api/skills 200 in 17ms
+ GET /api/skills 200 in 10ms
+ ✓ Compiled /users/[name] in 327ms (568 modules)
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 15ms
+ GET /api/posts?author=%E4%BD%90%E8%97%A4%20%E7%BE%8E%E5%92%B2 200 in 25ms
+ GET /api/posts?author=%E4%BD%90%E8%97%A4%20%E7%BE%8E%E5%92%B2 200 in 12ms
+ POST /api/messages 200 in 30ms
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 11ms
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 11ms
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 15ms
+ GET /api/posts 200 in 18ms
+ GET /api/posts 200 in 11ms
+ ○ Compiling /posts/[id] ...
+ ✓ Compiled /posts/[id] in 788ms (574 modules)
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 13ms
+ ✓ Compiled /api/posts/[id] in 178ms (312 modules)
+ GET /api/posts/cmop67j5a0000dlrou660zonp 200 in 681ms
+ GET /api/posts/cmop67j5a0000dlrou660zonp 200 in 21ms
+ GET /api/messages?to=%E3%82%B5%E3%83%B3%E3%82%BF%E3%83%8A 200 in 19ms
+ GET /api/posts 200 in 24ms
+ GET /api/posts 200 in 13ms
+ ✓ Compiled in 232ms (278 modules)
+ ✓ Compiled /api/posts in 787ms (546 modules)
+ ✓ Compiled in 1ms (299 modules)
+ GET /api/posts 200 in 612ms
+ GET /api/posts 200 in 10ms
+ ✓ Compiled in 353ms (578 modules)
+ ✓ Compiled in 488ms (578 modules)
+ ✓ Compiled in 475ms (544 modules)
+ ✓ Compiled in 423ms (544 modules)
+ ✓ Compiled in 365ms (544 modules)
