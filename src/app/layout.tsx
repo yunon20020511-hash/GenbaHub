@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className}>
         <div className="flex h-screen overflow-hidden">
           <Navigation />
-          <main className="flex-1 overflow-y-auto bg-[#0f172a]">{children}</main>
+          <main className="flex-1 overflow-y-auto bg-[#0f172a] pt-14 md:pt-0">{children}</main>
         </div>
       </body>
     </html>

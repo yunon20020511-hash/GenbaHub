@@ -11,6 +11,7 @@ export default function PostPage() {
   const [step, setStep] = useState<Step>('input')
   const [rawInput, setRawInput] = useState('')
   const [authorName, setAuthorName] = useState('')
+  const [nameInput, setNameInput] = useState('')
   const [structured, setStructured] = useState<StructuredPost | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
@@ -21,12 +22,17 @@ export default function PostPage() {
     if (stored) setAuthorName(stored)
   }, [])
 
+  function saveName() {
+    const name = nameInput.trim()
+    if (name) {
+      localStorage.setItem('pk_username', name)
+      setAuthorName(name)
+    }
+  }
+
   async function handleStructure() {
     if (!rawInput.trim()) return
-    if (!authorName.trim()) {
-      alert('左サイドバーで名前を設定してください')
-      return
-    }
+    if (!authorName.trim()) return
     setStep('processing')
     try {
       const res = await fetch('/api/ai/structure', {
@@ -114,6 +120,29 @@ export default function PostPage() {
 
       {/* Input */}
       {step === 'input' && (
+        <div className="space-y-4">
+        {/* Name input (shown when no name set) */}
+        {!authorName && (
+          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
+            <p className="text-amber-300 text-sm mb-3">投稿するには名前を設定してください</p>
+            <div className="flex gap-2">
+              <input
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && saveName()}
+                placeholder="現場名 / 氏名"
+                className="flex-1 bg-[#0f172a] text-white text-sm rounded-lg px-3 py-2 outline-none border border-amber-500/40 focus:border-amber-400"
+              />
+              <button
+                onClick={saveName}
+                disabled={!nameInput.trim()}
+                className="bg-amber-500 text-black px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-amber-400 transition-colors"
+              >
+                設定
+              </button>
+            </div>
+          </div>
+        )}
         <div className="bg-[#1e293b] border border-[#334155] rounded-xl p-6">
           <label className="block text-sm text-slate-400 mb-2">
             今日学んだこと・解決したエラーを自由に書いてください
@@ -127,12 +156,13 @@ export default function PostPage() {
           <div className="flex justify-end mt-4">
             <button
               onClick={handleStructure}
-              disabled={!rawInput.trim()}
+              disabled={!rawInput.trim() || !authorName.trim()}
               className="bg-cyan-500 text-black px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               AIで構造化する ✨
             </button>
           </div>
+        </div>
         </div>
       )}
 
