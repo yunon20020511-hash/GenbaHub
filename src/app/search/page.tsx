@@ -63,7 +63,7 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
+    <div className="p-4 md:p-8 max-w-3xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">現場あるある解決 Bot</h1>
         <p className="text-slate-400 text-sm mt-1">

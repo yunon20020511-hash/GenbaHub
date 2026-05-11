@@ -70,7 +70,7 @@ export default function PostDetailPage() {
   const tags = (() => { try { return JSON.parse(post.tags) as string[] } catch { return [] } })()
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
+    <div className="p-4 md:p-8 max-w-3xl mx-auto">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
         <Link href="/" className="hover:text-slate-300 transition-colors">ダッシュボード</Link>
@@ -82,8 +82,8 @@ export default function PostDetailPage() {
       <h1 className="text-2xl font-bold text-white mb-4 leading-tight">{post.title}</h1>
 
       {/* Meta */}
-      <div className="flex items-center justify-between gap-4 mb-6 pb-6 border-b border-[#334155]">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6 pb-6 border-b border-[#334155]">
+        <div className="flex items-center gap-3 flex-wrap">
           <Link href={`/users/${encodeURIComponent(post.authorName)}`} className="flex items-center gap-2 group">
             <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-violet-700 rounded-full flex items-center justify-center text-white text-sm font-bold group-hover:from-violet-400 transition-all">
               {post.authorName[0]?.toUpperCase()}

@@ -66,7 +66,7 @@ export default function UserProfilePage() {
   const lastActive = posts[0]?.createdAt
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="p-4 md:p-8 max-w-4xl mx-auto">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
         <Link href="/skills" className="hover:text-slate-300 transition-colors">スキルマトリクス</Link>
@@ -179,10 +179,10 @@ export default function UserProfilePage() {
                         ))}
                       </div>
                     </div>
-                    <div className="flex-shrink-0 flex items-center gap-2">
+                    <div className="flex-shrink-0 flex items-center gap-1.5 md:gap-2">
                       <button
                         onClick={(e) => { e.stopPropagation(); setQuestionPost({ title: post.title }) }}
-                        className="text-xs text-slate-500 hover:text-cyan-400 border border-[#334155] hover:border-cyan-500/40 px-2 py-1 rounded-lg transition-colors"
+                        className="hidden sm:block text-xs text-slate-500 hover:text-cyan-400 border border-[#334155] hover:border-cyan-500/40 px-2 py-1 rounded-lg transition-colors"
                       >
                         ❓ 質問
                       </button>

@@ -92,24 +92,24 @@ export default function DashboardPage() {
   const isFiltered = selectedTag !== null || techSearch.trim() !== ''
 
   return (
-    <div className="p-8 max-w-6xl mx-auto">
-      <div className="mb-8">
+    <div className="p-4 md:p-8 max-w-6xl mx-auto">
+      <div className="mb-6 md:mb-8">
         <h1 className="text-2xl font-bold text-white">ナレッジ一覧</h1>
         <p className="text-slate-400 text-sm mt-1">現場エンジニアの最新ナレッジ</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-2 md:gap-4 mb-6 md:mb-8">
         {[
           { label: '総投稿数', value: stats.posts, icon: '📝', color: 'text-cyan-400', glow: 'shadow-cyan-500/10' },
           { label: 'エンジニア数', value: stats.engineers, icon: '👥', color: 'text-violet-400', glow: 'shadow-violet-500/10' },
           { label: 'スキル種別', value: stats.skills, icon: '⚡', color: 'text-emerald-400', glow: 'shadow-emerald-500/10' },
         ].map((s) => (
-          <div key={s.label} className={`bg-[#1e293b] border border-[#334155] rounded-xl p-5 shadow-lg ${s.glow}`}>
-            <div className="flex items-center gap-2 text-slate-400 text-sm mb-2">
+          <div key={s.label} className={`bg-[#1e293b] border border-[#334155] rounded-xl p-3 md:p-5 shadow-lg ${s.glow}`}>
+            <div className="flex items-center gap-1 md:gap-2 text-slate-400 text-xs md:text-sm mb-1 md:mb-2">
               <span>{s.icon}</span>
-              {s.label}
+              <span className="truncate">{s.label}</span>
             </div>
-            <p className={`text-3xl font-black ${s.color}`}>{s.value}</p>
+            <p className={`text-xl md:text-3xl font-black ${s.color}`}>{s.value}</p>
           </div>
         ))}
       </div>
@@ -117,37 +117,39 @@ export default function DashboardPage() {
       <div className="flex gap-6 items-start">
         {/* Left: posts */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <div className="relative flex-1 max-w-xs">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
-              <input
-                type="text"
-                placeholder="技術を検索..."
-                value={techSearch}
-                onChange={(e) => { setTechSearch(e.target.value); setSelectedTag(null) }}
-                className="w-full bg-[#1e293b] border border-[#334155] rounded-xl pl-8 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 transition-colors"
-              />
+          <div className="mb-4 space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-sm">🔍</span>
+                <input
+                  type="text"
+                  placeholder="技術を検索..."
+                  value={techSearch}
+                  onChange={(e) => { setTechSearch(e.target.value); setSelectedTag(null) }}
+                  className="w-full bg-[#1e293b] border border-[#334155] rounded-xl pl-8 pr-3 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500/60 transition-colors"
+                />
+              </div>
+              <Link href="/post" className="text-cyan-400 text-sm hover:text-cyan-300 transition-colors whitespace-nowrap">
+                + 投稿する →
+              </Link>
             </div>
-            <div className="flex items-center gap-3">
-              {isFiltered && (
-                <button
-                  onClick={clearFilter}
-                  className="text-xs text-slate-400 hover:text-cyan-400 border border-[#334155] hover:border-cyan-500/40 px-2.5 py-1.5 rounded-lg transition-colors"
-                >
-                  ✕ フィルター解除
-                </button>
-              )}
-              <h2 className="text-lg font-semibold text-white whitespace-nowrap">
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="text-base md:text-lg font-semibold text-white">
                 {selectedTag ? (
                   <span>「<span className="text-cyan-400">{selectedTag}</span>」の投稿</span>
                 ) : isFiltered ? (
                   <span>検索結果 <span className="text-slate-400 text-sm font-normal">({filteredPosts.length}件)</span></span>
                 ) : '最新ナレッジ'}
               </h2>
+              {isFiltered && (
+                <button
+                  onClick={clearFilter}
+                  className="text-xs text-slate-400 hover:text-cyan-400 border border-[#334155] hover:border-cyan-500/40 px-2.5 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+                >
+                  ✕ フィルター解除
+                </button>
+              )}
             </div>
-            <Link href="/post" className="text-cyan-400 text-sm hover:text-cyan-300 transition-colors whitespace-nowrap">
-              + 投稿する →
-            </Link>
           </div>
 
           {loading ? (
@@ -220,7 +222,7 @@ export default function DashboardPage() {
                         <div className="flex items-center gap-1.5">
                           <button
                             onClick={() => setQuestionPost({ title: post.title, authorName: post.authorName })}
-                            className="text-xs text-slate-500 border border-[#334155] hover:border-cyan-500/40 hover:text-cyan-400 px-2 py-1 rounded-lg transition-colors"
+                            className="hidden sm:block text-xs text-slate-500 border border-[#334155] hover:border-cyan-500/40 hover:text-cyan-400 px-2 py-1 rounded-lg transition-colors"
                           >
                             ❓ 質問
                           </button>
@@ -235,9 +237,9 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Right: ranking sidebar */}
+        {/* Right: ranking sidebar - hidden on mobile */}
         {!loading && tagRanking.length > 0 && (
-          <div className="w-60 flex-shrink-0 sticky top-4">
+          <div className="hidden md:block w-60 flex-shrink-0 sticky top-4">
             <div className="bg-[#1e293b] border border-[#334155] rounded-xl p-4">
               <h3 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
                 <span>🏆</span> 人気の技術ランキング

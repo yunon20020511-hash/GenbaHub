@@ -86,22 +86,22 @@ export default function PostPage() {
   ]
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
+    <div className="p-4 md:p-8 max-w-3xl mx-auto">
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">ナレッジを投稿する</h1>
         <p className="text-slate-400 text-sm mt-1">メモや箇条書きをAIが技術記事に整形します</p>
       </div>
 
       {/* Step indicator */}
-      <div className="flex items-center gap-2 mb-8">
+      <div className="flex items-center gap-1.5 md:gap-2 mb-6 md:mb-8">
         {stepLabels.map((s, i) => {
           const isActive = step === s.id || (step === 'done' && i < 3)
           const isPast =
             (step === 'review' && i < 2) || step === 'done'
           return (
-            <div key={s.id} className="flex items-center gap-2">
+            <div key={s.id} className="flex items-center gap-1.5 md:gap-2">
               <div
-                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors flex-shrink-0 ${
                   isActive || isPast
                     ? 'bg-cyan-500 text-black'
                     : 'bg-slate-700 text-slate-500'
@@ -109,10 +109,10 @@ export default function PostPage() {
               >
                 {i + 1}
               </div>
-              <span className={`text-sm ${isActive ? 'text-white' : 'text-slate-500'}`}>
+              <span className={`text-xs md:text-sm whitespace-nowrap ${isActive ? 'text-white' : 'text-slate-500'}`}>
                 {s.label}
               </span>
-              {i < 2 && <span className="text-slate-600 mx-1">→</span>}
+              {i < 2 && <span className="text-slate-600 mx-0.5 md:mx-1">→</span>}
             </div>
           )
         })}
