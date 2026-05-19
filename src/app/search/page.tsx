@@ -15,10 +15,19 @@ interface Post {
   createdAt: string
 }
 
+interface RelatedPost {
+  id: string
+  title: string
+  summary: string
+  authorName: string
+  tags: string[]
+}
+
 interface AiAdvice {
   advice: string
   relatedSkills: string[]
   steps: string[]
+  relatedPosts: RelatedPost[]
 }
 
 export default function SearchPage() {
@@ -30,7 +39,6 @@ export default function SearchPage() {
   const [aiAdvice, setAiAdvice] = useState<AiAdvice | null>(null)
   const [adviceLoading, setAdviceLoading] = useState(false)
 
-  // AI advice when no results
   useEffect(() => {
     if (!searched || loading || results.length > 0 || !query.trim()) {
       setAiAdvice(null)
@@ -103,7 +111,7 @@ export default function SearchPage() {
         </div>
       )}
 
-      {/* Results */}
+      {/* Direct search results */}
       {searched && !loading && results.length > 0 && (
         <div>
           <p className="text-slate-500 text-sm mb-4">{results.length}件の関連ナレッジが見つかりました</p>
@@ -160,11 +168,11 @@ export default function SearchPage() {
         </div>
       )}
 
-      {/* No results → AI advice */}
+      {/* No results → AI advice + related posts from DB */}
       {searched && !loading && results.length === 0 && (
         <div>
           <p className="text-slate-500 text-sm mb-5">
-            チームのナレッジに「{query}」の情報は見つかりませんでした
+            チームのナレッジに「{query}」の完全一致は見つかりませんでした
           </p>
 
           {adviceLoading ? (
@@ -181,6 +189,37 @@ export default function SearchPage() {
             </div>
           ) : aiAdvice ? (
             <div className="space-y-4">
+              {/* Related posts from DB (tag match) */}
+              {aiAdvice.relatedPosts?.length > 0 && (
+                <div className="bg-[#1e293b] border border-emerald-500/20 rounded-xl p-5">
+                  <p className="text-emerald-400 text-xs font-semibold uppercase tracking-wide mb-3">
+                    関連タグのナレッジ（{aiAdvice.relatedPosts.length}件）
+                  </p>
+                  <div className="space-y-3">
+                    {aiAdvice.relatedPosts.map((post) => (
+                      <Link
+                        key={post.id}
+                        href={`/posts/${post.id}`}
+                        className="block bg-[#0f172a] border border-[#334155] hover:border-emerald-500/30 rounded-xl p-4 transition-colors group"
+                      >
+                        <p className="text-white text-sm font-medium mb-1 group-hover:text-emerald-400 transition-colors">
+                          {post.title}
+                        </p>
+                        <p className="text-slate-500 text-xs mb-2 line-clamp-2">{post.summary}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {post.tags.slice(0, 4).map((tag) => (
+                            <span key={tag} className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs px-2 py-0.5 rounded-full">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-slate-600 text-xs mt-2">{post.authorName} の投稿</p>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* AI Advice card */}
               <div className="bg-gradient-to-br from-cyan-500/10 to-violet-500/10 border border-cyan-500/20 rounded-xl p-5">
                 <div className="flex items-center gap-2 mb-3">

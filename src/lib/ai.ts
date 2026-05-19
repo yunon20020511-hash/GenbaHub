@@ -32,8 +32,7 @@ export async function structureKnowledge(
         },
         {
           role: 'user',
-          content: `エンジニア名: ${authorName}
-入力メモ:
+          content: `入力メモ:
 ${rawInput}
 
 以下のJSON形式で出力してください:
@@ -58,11 +57,11 @@ tagsはReact, TypeScript, Docker, Python, AWS, エラー解決など技術キー
   }
 }
 
-function mockStructure(rawInput: string, authorName: string): StructuredPost {
+function mockStructure(rawInput: string, _authorName: string): StructuredPost {
   const firstLine = rawInput.split('\n')[0].slice(0, 50)
   return {
-    title: firstLine || `${authorName}のナレッジメモ`,
-    summary: `${authorName}が記録した技術メモです。${rawInput.slice(0, 80)}${rawInput.length > 80 ? '...' : ''}`,
+    title: firstLine || 'ナレッジメモ',
+    summary: `技術メモです。${rawInput.slice(0, 80)}${rawInput.length > 80 ? '...' : ''}`,
     content: `## 概要\n\n${rawInput}\n\n## まとめ\n\nこの内容を技術記事として整理しました。\n\n> GROQ_API_KEY を .env.local に設定するとAI整形が有効になります。`,
     tags: ['メモ', '技術情報'],
     advice: 'GROQ_API_KEY を .env.local に設定するとAI整形が有効になります。',
