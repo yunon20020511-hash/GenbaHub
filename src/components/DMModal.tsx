@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 
 interface Props {
   toName: string
@@ -8,24 +9,19 @@ interface Props {
 }
 
 export default function DMModal({ toName, onClose }: Props) {
-  const [fromName, setFromName] = useState('')
+  const { data: session } = useSession()
   const [message, setMessage] = useState('')
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
 
-  useEffect(() => {
-    const stored = localStorage.getItem('pk_username')
-    if (stored) setFromName(stored)
-  }, [])
-
   async function handleSend() {
-    if (!message.trim() || !fromName.trim()) return
+    if (!message.trim() || !session?.user) return
     setSending(true)
     try {
       const res = await fetch('/api/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fromName, toName, content: message }),
+        body: JSON.stringify({ toName, content: message }),
       })
       if (res.ok) setSent(true)
     } finally {
@@ -71,16 +67,17 @@ export default function DMModal({ toName, onClose }: Props) {
           </div>
         ) : (
           <div className="p-5">
-            {!fromName && (
+            {!session && (
               <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-3 mb-4 flex items-center gap-2">
                 <span className="text-amber-400">⚠</span>
-                <p className="text-amber-300 text-xs">左サイドバーで自分の名前を設定してください</p>
+                <p className="text-amber-300 text-xs">サインインしてからDMを送信してください</p>
               </div>
             )}
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder={`${toName}さんへのメッセージを入力...\n（スキルについての質問、案件の相談など）`}
+              maxLength={2000}
               className="w-full h-36 bg-[#0f172a] text-white text-sm rounded-xl p-4 outline-none border border-[#334155] focus:border-cyan-500/50 resize-none placeholder:text-slate-600"
               autoFocus
             />
@@ -93,7 +90,7 @@ export default function DMModal({ toName, onClose }: Props) {
               </button>
               <button
                 onClick={handleSend}
-                disabled={!message.trim() || !fromName || sending}
+                disabled={!message.trim() || !session || sending}
                 className="flex-1 bg-cyan-500 text-black py-2.5 rounded-xl text-sm font-semibold hover:bg-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
                 {sending ? '送信中...' : '送信する 💬'}

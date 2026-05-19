@@ -8,8 +8,22 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  posts        Post[]
+  likes        Like[]
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+}
+
 model Post {
   id         String    @id @default(cuid())
+  authorId   String?
+  author     User?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
   authorName String
   rawInput   String
   title      String
@@ -19,13 +33,36 @@ model Post {
   advice     String?
   likes      Int       @default(0)
   createdAt  DateTime  @default(now())
+  likedBy    Like[]
+
+  @@index([authorId])
+  @@index([authorName])
+  @@index([createdAt])
 }
 
 model Message {
   id        String   @id @default(cuid())
+  fromId    String?
+  from      User?    @relation("SentMessages", fields: [fromId], references: [id], onDelete: SetNull)
+  toId      String?
+  to        User?    @relation("ReceivedMessages", fields: [toId], references: [id], onDelete: SetNull)
   fromName  String
   toName    String
   content   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+
+  @@index([toId])
+  @@index([fromId])
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, postId])
 }

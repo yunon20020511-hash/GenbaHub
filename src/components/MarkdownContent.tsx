@@ -2,6 +2,7 @@
 
 import { marked } from 'marked'
 import { useMemo } from 'react'
+import DOMPurify from 'isomorphic-dompurify'
 
 marked.use({
   gfm: true,
@@ -9,7 +10,11 @@ marked.use({
 })
 
 export default function MarkdownContent({ content }: { content: string }) {
-  const html = useMemo(() => marked.parse(content) as string, [content])
+  const html = useMemo(() => {
+    const rawHtml = marked.parse(content) as string
+    return DOMPurify.sanitize(rawHtml)
+  }, [content])
+
   return (
     <div
       className="markdown-content"

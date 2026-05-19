@@ -2,44 +2,39 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import type { StructuredPost } from '@/lib/ai'
 
 type Step = 'input' | 'processing' | 'review' | 'done'
 
 export default function PostPage() {
   const router = useRouter()
+  const { data: session } = useSession()
   const [step, setStep] = useState<Step>('input')
   const [rawInput, setRawInput] = useState('')
-  const [authorName, setAuthorName] = useState('')
-  const [nameInput, setNameInput] = useState('')
   const [structured, setStructured] = useState<StructuredPost | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editContent, setEditContent] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    const stored = localStorage.getItem('pk_username')
-    if (stored) setAuthorName(stored)
-  }, [])
-
-  function saveName() {
-    const name = nameInput.trim()
-    if (name) {
-      localStorage.setItem('pk_username', name)
-      setAuthorName(name)
-    }
-  }
+    if (session === null) router.push('/auth/signin')
+  }, [session, router])
 
   async function handleStructure() {
-    if (!rawInput.trim()) return
-    if (!authorName.trim()) return
+    if (!rawInput.trim() || !session?.user) return
     setStep('processing')
     try {
       const res = await fetch('/api/ai/structure', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rawInput, authorName }),
+        body: JSON.stringify({ rawInput }),
       })
+      if (res.status === 429) {
+        alert('リクエストが多すぎます。少し待ってから再試行してください。')
+        setStep('input')
+        return
+      }
       const data: StructuredPost = await res.json()
       setStructured(data)
       setEditTitle(data.title)
@@ -59,7 +54,6 @@ export default function PostPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          authorName,
           rawInput,
           title: editTitle,
           summary: structured.summary,
@@ -71,6 +65,9 @@ export default function PostPage() {
       if (res.ok) {
         setStep('done')
         setTimeout(() => router.push('/'), 1500)
+      } else {
+        const data = await res.json()
+        alert(data.error ?? '保存に失敗しました')
       }
     } catch {
       alert('保存に失敗しました')
@@ -85,6 +82,14 @@ export default function PostPage() {
     { id: 'review', label: '③ 確認・保存' },
   ]
 
+  if (!session) {
+    return (
+      <div className="p-8 max-w-3xl mx-auto text-center py-20">
+        <div className="text-slate-500">読み込み中...</div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-4 md:p-8 max-w-3xl mx-auto">
       <div className="mb-8">
@@ -96,15 +101,12 @@ export default function PostPage() {
       <div className="flex items-center gap-1.5 md:gap-2 mb-6 md:mb-8">
         {stepLabels.map((s, i) => {
           const isActive = step === s.id || (step === 'done' && i < 3)
-          const isPast =
-            (step === 'review' && i < 2) || step === 'done'
+          const isPast = (step === 'review' && i < 2) || step === 'done'
           return (
             <div key={s.id} className="flex items-center gap-1.5 md:gap-2">
               <div
                 className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors flex-shrink-0 ${
-                  isActive || isPast
-                    ? 'bg-cyan-500 text-black'
-                    : 'bg-slate-700 text-slate-500'
+                  isActive || isPast ? 'bg-cyan-500 text-black' : 'bg-slate-700 text-slate-500'
                 }`}
               >
                 {i + 1}
@@ -121,48 +123,36 @@ export default function PostPage() {
       {/* Input */}
       {step === 'input' && (
         <div className="space-y-4">
-        {/* Name input (shown when no name set) */}
-        {!authorName && (
-          <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4">
-            <p className="text-amber-300 text-sm mb-3">投稿するには名前を設定してください</p>
-            <div className="flex gap-2">
-              <input
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && saveName()}
-                placeholder="現場名 / 氏名"
-                className="flex-1 bg-[#0f172a] text-white text-sm rounded-lg px-3 py-2 outline-none border border-amber-500/40 focus:border-amber-400"
-              />
+          <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl px-4 py-3 flex items-center gap-2">
+            <div className="w-6 h-6 bg-gradient-to-br from-violet-500 to-violet-700 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+              {session.user.name[0]?.toUpperCase()}
+            </div>
+            <p className="text-cyan-300 text-sm">
+              <span className="font-medium">{session.user.name}</span> として投稿します
+            </p>
+          </div>
+          <div className="bg-[#1e293b] border border-[#334155] rounded-xl p-6">
+            <label className="block text-sm text-slate-400 mb-2">
+              今日学んだこと・解決したエラーを自由に書いてください
+            </label>
+            <textarea
+              value={rawInput}
+              onChange={(e) => setRawInput(e.target.value)}
+              placeholder={`例:\n- Dockerのネットワーク設定でハマった\n- bridgeモードとhostモードの違いがわかった\n- docker-compose.yml の networks 設定で解決\n- depends_on だけじゃ通信できなかった`}
+              className="w-full h-52 bg-[#0f172a] text-white text-sm rounded-lg p-4 outline-none border border-[#334155] focus:border-cyan-500/50 resize-none placeholder:text-slate-600"
+              maxLength={5000}
+            />
+            <div className="flex justify-between items-center mt-4">
+              <span className="text-xs text-slate-600">{rawInput.length} / 5000</span>
               <button
-                onClick={saveName}
-                disabled={!nameInput.trim()}
-                className="bg-amber-500 text-black px-4 py-2 rounded-lg text-sm font-medium disabled:opacity-40 hover:bg-amber-400 transition-colors"
+                onClick={handleStructure}
+                disabled={!rawInput.trim()}
+                className="bg-cyan-500 text-black px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                設定
+                AIで構造化する ✨
               </button>
             </div>
           </div>
-        )}
-        <div className="bg-[#1e293b] border border-[#334155] rounded-xl p-6">
-          <label className="block text-sm text-slate-400 mb-2">
-            今日学んだこと・解決したエラーを自由に書いてください
-          </label>
-          <textarea
-            value={rawInput}
-            onChange={(e) => setRawInput(e.target.value)}
-            placeholder={`例:\n- Dockerのネットワーク設定でハマった\n- bridgeモードとhostモードの違いがわかった\n- docker-compose.yml の networks 設定で解決\n- depends_on だけじゃ通信できなかった`}
-            className="w-full h-52 bg-[#0f172a] text-white text-sm rounded-lg p-4 outline-none border border-[#334155] focus:border-cyan-500/50 resize-none placeholder:text-slate-600"
-          />
-          <div className="flex justify-end mt-4">
-            <button
-              onClick={handleStructure}
-              disabled={!rawInput.trim() || !authorName.trim()}
-              className="bg-cyan-500 text-black px-6 py-2.5 rounded-lg text-sm font-semibold hover:bg-cyan-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              AIで構造化する ✨
-            </button>
-          </div>
-        </div>
         </div>
       )}
 
@@ -174,7 +164,7 @@ export default function PostPage() {
             style={{ borderWidth: '3px' }}
           />
           <p className="text-white font-medium">AIが整形中...</p>
-          <p className="text-slate-500 text-sm mt-2">Geminiがメモを技術記事に変換しています</p>
+          <p className="text-slate-500 text-sm mt-2">メモを技術記事に変換しています</p>
         </div>
       )}
 
@@ -186,6 +176,7 @@ export default function PostPage() {
             <input
               value={editTitle}
               onChange={(e) => setEditTitle(e.target.value)}
+              maxLength={200}
               className="w-full bg-transparent text-white font-semibold text-lg outline-none border-b border-transparent focus:border-cyan-500/50 pb-1"
             />
           </div>
@@ -214,6 +205,7 @@ export default function PostPage() {
             <textarea
               value={editContent}
               onChange={(e) => setEditContent(e.target.value)}
+              maxLength={50000}
               className="w-full h-52 bg-[#0f172a] text-slate-300 text-sm rounded-lg p-4 outline-none border border-[#334155] focus:border-cyan-500/50 resize-none"
             />
           </div>

@@ -1,20 +1,28 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
+import { rateLimit } from '@/lib/rateLimit'
 
-export async function POST(request: Request) {
-  const { query } = await request.json()
-  const apiKey = process.env.GROQ_API_KEY
+const fallback = (query: string) => ({
+  advice: `「${query}」に関するナレッジはまだ登録されていません。公式ドキュメントや Stack Overflow を参照し、解決できたらぜひ Genba Hub に投稿してチームで共有しましょう！`,
+  relatedSkills: [] as string[],
+  steps: ['公式ドキュメントを確認する', 'Stack Overflow / Qiita で検索する', '解決したら Genba Hub に投稿する'],
+})
 
-  if (!apiKey) {
-    return NextResponse.json({
-      advice: `「${query}」に関するナレッジはまだ登録されていません。公式ドキュメントや Stack Overflow を参照し、解決できたらぜひ Genba Hub に投稿してチームで共有しましょう！`,
-      relatedSkills: [],
-      steps: ['公式ドキュメントを確認する', 'Stack Overflow / Qiita で検索する', '解決したら Genba Hub に投稿する'],
-    })
+export async function POST(request: NextRequest) {
+  const ip = request.headers.get('x-forwarded-for')?.split(',')[0].trim() ?? 'unknown'
+  if (!rateLimit(`advice:${ip}`, 20, 60_000)) {
+    return NextResponse.json({ error: 'Too many requests' }, { status: 429 })
   }
 
-  const groq = new Groq({ apiKey })
   try {
+    const { query } = await request.json()
+    if (!query?.trim()) return NextResponse.json(fallback(''))
+    const safeQuery = String(query).slice(0, 200)
+
+    const apiKey = process.env.GROQ_API_KEY
+    if (!apiKey) return NextResponse.json(fallback(safeQuery))
+
+    const groq = new Groq({ apiKey })
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       temperature: 0.5,
@@ -23,31 +31,28 @@ export async function POST(request: Request) {
       messages: [
         {
           role: 'system',
-          content: `あなたはSESエンジニアを支援するテクニカルアドバイザーです。
-社内ナレッジベースに検索結果がなかった場合に、実践的なアドバイスを提供します。
-JSON形式のみで回答してください。`,
+          content: `あなたはSESエンジニアを支援するテクニカルアドバイザーです。以下のJSON形式のみで回答してください:
+{"advice":"具体的なアドバイス（150文字以内）","relatedSkills":["技術1","技術2"],"steps":["アプローチ1","アプローチ2"]}`,
         },
         {
           role: 'user',
-          content: `SESエンジニアが「${query}」で検索しましたが、社内ナレッジが見つかりませんでした。
-
-以下のJSON形式でアドバイスをください:
-{
-  "advice": "具体的で実践的なアドバイス（日本語、150文字以内）",
-  "relatedSkills": ["関連技術1", "関連技術2", "関連技術3"],
-  "steps": ["すぐに試せるアプローチ1", "アプローチ2", "アプローチ3"]
-}`,
+          content: safeQuery,
         },
       ],
     })
 
     const text = completion.choices[0].message.content ?? '{}'
-    return NextResponse.json(JSON.parse(text))
-  } catch {
+    const parsed = JSON.parse(text)
     return NextResponse.json({
-      advice: `「${query}」について、まず公式ドキュメントと Stack Overflow / Qiita を確認してみましょう。解決できたら Genba Hub に投稿してチームで共有してください！`,
-      relatedSkills: [],
-      steps: ['公式ドキュメントを確認する', 'Stack Overflow / Qiita で検索する', '解決したら Genba Hub に投稿する'],
+      advice: typeof parsed.advice === 'string' ? parsed.advice.slice(0, 300) : '',
+      relatedSkills: Array.isArray(parsed.relatedSkills)
+        ? parsed.relatedSkills.slice(0, 5).map(String)
+        : [],
+      steps: Array.isArray(parsed.steps)
+        ? parsed.steps.slice(0, 5).map(String)
+        : [],
     })
+  } catch {
+    return NextResponse.json(fallback(''))
   }
 }

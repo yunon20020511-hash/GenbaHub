@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import Navigation from '@/components/Navigation'
+import AuthSessionProvider from '@/components/AuthSessionProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,10 +15,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ja">
       <body className={inter.className}>
-        <div className="flex h-screen overflow-hidden">
-          <Navigation />
-          <main className="flex-1 overflow-y-auto bg-[#0f172a] pt-14 md:pt-0">{children}</main>
-        </div>
+        <AuthSessionProvider>
+          <div className="flex h-screen overflow-hidden">
+            <Navigation />
+            <main className="flex-1 overflow-y-auto bg-[#0f172a] pt-14 md:pt-0">{children}</main>
+          </div>
+        </AuthSessionProvider>
       </body>
     </html>
   )

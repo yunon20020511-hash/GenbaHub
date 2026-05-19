@@ -1,39 +1,34 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useSession, signOut } from 'next-auth/react'
 
 const navItems = [
   { href: '/', label: 'ナレッジ一覧', icon: '⚡' },
   { href: '/post', label: '知恵を投稿', icon: '✏️' },
   { href: '/skills', label: 'エンジニア検索', icon: '👥' },
   { href: '/search', label: '現場あるある Bot', icon: '🔍' },
+  { href: '/messages', label: '質問箱', icon: '💬' },
 ]
 
 export default function Navigation() {
   const pathname = usePathname()
-  const [userName, setUserName] = useState('')
-  const [editing, setEditing] = useState(false)
-  const [input, setInput] = useState('')
+  const router = useRouter()
+  const { data: session, status } = useSession()
   const [isOpen, setIsOpen] = useState(false)
-
-  useEffect(() => {
-    const stored = localStorage.getItem('pk_username')
-    if (stored) setUserName(stored)
-  }, [])
 
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
 
-  function saveName() {
-    const name = input.trim()
-    if (name) {
-      localStorage.setItem('pk_username', name)
-      setUserName(name)
-    }
-    setEditing(false)
+  const userName = session?.user?.name ?? ''
+
+  async function handleSignOut() {
+    await signOut({ redirect: false })
+    router.push('/auth/signin')
+    router.refresh()
   }
 
   return (
@@ -60,12 +55,14 @@ export default function Navigation() {
       )}
 
       {/* Sidebar */}
-      <aside className={`
-        w-60 flex-shrink-0 bg-[#0d1525] border-r border-[#1e2d45] flex flex-col
-        fixed md:static top-0 left-0 h-full z-50
-        transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
-      `}>
+      <aside
+        className={`
+          w-60 flex-shrink-0 bg-[#0d1525] border-r border-[#1e2d45] flex flex-col
+          fixed md:static top-0 left-0 h-full z-50
+          transition-transform duration-300 ease-in-out
+          ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+        `}
+      >
         {/* Logo */}
         <div className="p-5 border-b border-[#1e2d45] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -111,38 +108,43 @@ export default function Navigation() {
 
         {/* User */}
         <div className="p-3">
-          {editing ? (
-            <div className="flex gap-2 p-2">
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && saveName()}
-                placeholder="現場名 / 氏名"
-                autoFocus
-                className="flex-1 bg-[#1e293b] text-white text-xs rounded-lg px-3 py-2 outline-none border border-cyan-500/50"
-              />
-              <button
-                onClick={saveName}
-                className="text-cyan-400 hover:text-cyan-300 text-sm px-1 transition-colors"
+          {status === 'loading' ? (
+            <div className="flex items-center gap-2.5 p-2.5">
+              <div className="w-8 h-8 bg-slate-700 rounded-full animate-pulse" />
+              <div className="h-3 bg-slate-700 rounded w-24 animate-pulse" />
+            </div>
+          ) : session ? (
+            <div className="space-y-1">
+              <Link
+                href={`/users/${encodeURIComponent(userName)}`}
+                className="flex items-center gap-2.5 w-full text-left hover:bg-white/5 rounded-xl p-2.5 transition-colors group"
               >
-                ✓
+                <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-violet-700 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md">
+                  {userName[0]?.toUpperCase() ?? '?'}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-white text-xs font-medium truncate group-hover:text-cyan-400 transition-colors">
+                    {userName}
+                  </p>
+                  <p className="text-slate-600 text-xs truncate">{session.user.email}</p>
+                </div>
+              </Link>
+              <button
+                onClick={handleSignOut}
+                className="w-full text-left flex items-center gap-2.5 px-2.5 py-2 text-slate-500 hover:text-red-400 hover:bg-red-500/5 rounded-xl text-xs transition-colors"
+              >
+                <span>↩</span>
+                <span>サインアウト</span>
               </button>
             </div>
           ) : (
-            <button
-              onClick={() => { setInput(userName); setEditing(true) }}
-              className="flex items-center gap-2.5 w-full text-left hover:bg-white/5 rounded-xl p-2.5 transition-colors group"
+            <Link
+              href="/auth/signin"
+              className="flex items-center gap-2.5 w-full px-2.5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 rounded-xl text-cyan-400 text-xs font-medium transition-colors"
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-violet-500 to-violet-700 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 shadow-md">
-                {userName ? userName[0].toUpperCase() : '?'}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-white text-xs font-medium truncate group-hover:text-cyan-400 transition-colors">
-                  {userName || '名前を設定してください'}
-                </p>
-                <p className="text-slate-600 text-xs">タップして編集</p>
-              </div>
-            </button>
+              <span>→</span>
+              <span>サインイン / 登録</span>
+            </Link>
           )}
         </div>
       </aside>

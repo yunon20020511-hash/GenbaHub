@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 
 interface Message {
@@ -25,23 +26,19 @@ function parseQuestion(content: string) {
 }
 
 export default function MessagesPage() {
-  const [userName, setUserName] = useState('')
+  const { data: session, status } = useSession()
   const [messages, setMessages] = useState<Message[]>([])
   const [loading, setLoading] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null)
 
   useEffect(() => {
-    const stored = localStorage.getItem('pk_username')
-    if (stored) setUserName(stored)
-  }, [])
-
-  useEffect(() => {
-    if (!userName) return
+    if (status !== 'authenticated') return
     setLoading(true)
-    fetch(`/api/messages?to=${encodeURIComponent(userName)}`)
+    fetch('/api/messages')
       .then((r) => r.json())
       .then((data: Message[]) => { setMessages(Array.isArray(data) ? data : []); setLoading(false) })
-  }, [userName])
+      .catch(() => setLoading(false))
+  }, [status])
 
   async function markRead(id: string) {
     await fetch('/api/messages', {
@@ -57,6 +54,25 @@ export default function MessagesPage() {
     if (!isRead) markRead(id)
   }
 
+  if (status === 'loading') {
+    return (
+      <div className="p-8 max-w-2xl mx-auto">
+        <div className="space-y-3">
+          {[1, 2].map((i) => (
+            <div key={i} className="bg-[#1e293b] border border-[#334155] rounded-xl p-5 animate-pulse">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-8 h-8 bg-slate-700 rounded-full" />
+                <div className="h-4 bg-slate-700 rounded w-32" />
+              </div>
+              <div className="h-3 bg-slate-700 rounded w-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  const userName = session?.user?.name ?? ''
   const unread = messages.filter((m) => !m.isRead).length
 
   return (
@@ -64,17 +80,11 @@ export default function MessagesPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white">質問箱</h1>
         <p className="text-slate-400 text-sm mt-1">
-          {userName ? `${userName}さんへの質問` : '左サイドバーで名前を設定してください'}
+          {userName ? `${userName}さんへの質問` : ''}
         </p>
       </div>
 
-      {!userName ? (
-        <div className="text-center py-16 bg-[#1e293b] rounded-xl border border-[#334155]">
-          <div className="text-4xl mb-3">👤</div>
-          <p className="text-slate-400 mb-2">名前が設定されていません</p>
-          <p className="text-slate-600 text-sm">左サイドバーで名前を設定すると質問を受信できます</p>
-        </div>
-      ) : loading ? (
+      {loading ? (
         <div className="space-y-3">
           {[1, 2].map((i) => (
             <div key={i} className="bg-[#1e293b] border border-[#334155] rounded-xl p-5 animate-pulse">
@@ -90,9 +100,7 @@ export default function MessagesPage() {
         <div className="text-center py-16 bg-[#1e293b] rounded-xl border border-[#334155]">
           <div className="text-5xl mb-4">❓</div>
           <p className="text-slate-400 mb-2">質問はまだありません</p>
-          <p className="text-slate-600 text-sm">
-            ナレッジに質問ボタンが表示されます
-          </p>
+          <p className="text-slate-600 text-sm">ナレッジに質問ボタンが表示されます</p>
           <Link href="/" className="inline-block mt-4 text-cyan-400 hover:text-cyan-300 text-sm transition-colors">
             ナレッジ一覧へ →
           </Link>
@@ -101,7 +109,9 @@ export default function MessagesPage() {
         <div>
           {unread > 0 && (
             <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl px-4 py-3 mb-4 flex items-center gap-2">
-              <span className="w-5 h-5 bg-cyan-500 text-black text-xs font-bold rounded-full flex items-center justify-center">{unread}</span>
+              <span className="w-5 h-5 bg-cyan-500 text-black text-xs font-bold rounded-full flex items-center justify-center">
+                {unread}
+              </span>
               <p className="text-cyan-400 text-sm">件の未読質問があります</p>
             </div>
           )}
@@ -138,7 +148,9 @@ export default function MessagesPage() {
                             {msg.fromName}
                           </Link>
                           {!msg.isRead && (
-                            <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs px-1.5 py-0.5 rounded-full">未読</span>
+                            <span className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs px-1.5 py-0.5 rounded-full">
+                              未読
+                            </span>
                           )}
                         </div>
                         <span className="text-slate-600 text-xs flex-shrink-0">{formatDate(msg.createdAt)}</span>
@@ -146,7 +158,9 @@ export default function MessagesPage() {
                       {postTitle && (
                         <p className="text-xs text-slate-500 mb-1 truncate">📝 {postTitle}</p>
                       )}
-                      <p className={`text-sm ${expanded === msg.id ? 'text-slate-200 whitespace-pre-wrap' : 'text-slate-400 truncate'}`}>
+                      <p
+                        className={`text-sm ${expanded === msg.id ? 'text-slate-200 whitespace-pre-wrap' : 'text-slate-400 truncate'}`}
+                      >
                         {body}
                       </p>
                     </div>

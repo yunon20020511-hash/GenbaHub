@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSession } from 'next-auth/react'
 
 interface Props {
   toName: string
@@ -9,20 +10,18 @@ interface Props {
 }
 
 export default function QuestionModal({ toName, postTitle, onClose }: Props) {
+  const { data: session } = useSession()
   const [question, setQuestion] = useState('')
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
 
-  const fromName = typeof window !== 'undefined' ? (localStorage.getItem('pk_username') ?? '') : ''
-
   async function handleSend() {
-    if (!question.trim() || !fromName) return
+    if (!question.trim() || !session?.user) return
     setSending(true)
     await fetch('/api/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        fromName,
         toName,
         content: `【質問】${postTitle}\n\n${question.trim()}`,
       }),
@@ -70,9 +69,9 @@ export default function QuestionModal({ toName, postTitle, onClose }: Props) {
               <p className="text-slate-300 text-sm line-clamp-2">{postTitle}</p>
             </div>
 
-            {!fromName && (
+            {!session && (
               <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-3 py-2 mb-3">
-                <p className="text-amber-400 text-xs">左サイドバーで名前を設定してから質問してください</p>
+                <p className="text-amber-400 text-xs">サインインしてから質問してください</p>
               </div>
             )}
 
@@ -80,6 +79,7 @@ export default function QuestionModal({ toName, postTitle, onClose }: Props) {
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
               placeholder="質問を入力してください..."
+              maxLength={2000}
               rows={4}
               className="w-full bg-[#0f172a] border border-[#334155] rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-600 focus:outline-none focus:border-cyan-500/60 resize-none mb-4"
             />
@@ -93,7 +93,7 @@ export default function QuestionModal({ toName, postTitle, onClose }: Props) {
               </button>
               <button
                 onClick={handleSend}
-                disabled={!question.trim() || !fromName || sending}
+                disabled={!question.trim() || !session || sending}
                 className="flex-1 bg-cyan-500 text-black py-2.5 rounded-xl text-sm font-semibold hover:bg-cyan-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {sending ? '送信中...' : '送信する'}
